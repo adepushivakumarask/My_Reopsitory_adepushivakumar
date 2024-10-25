@@ -1,0 +1,572 @@
+                               E-commerce Database Design Case Study Question with Quary 
+1.Database Schema Design:
+-->Design a database schema for an e-commerce platform that tracks customers, products, orders, and payments.
+    What tables would you create, and what attributes would each table have?
+     
+Customers Table:
+mysql> desc customers;
++-------------+--------------+------+-----+---------+----------------+
+| Field       | Type         | Null | Key | Default | Extra          |
++-------------+--------------+------+-----+---------+----------------+
+| customer_id | int          | NO   | PRI | NULL    | auto_increment |
+| name        | varchar(100) | YES  |     | NULL    |                |
+| email       | varchar(100) | YES  | UNI | NULL    |                |
+| phone       | varchar(15)  | YES  |     | NULL    |                |
+| address     | text         | YES  |     | NULL    |                |
++-------------+--------------+------+-----+---------+----------------+
+
+Products Table:
+mysql> desc products;
++----------------+---------------+------+-----+---------+----------------+
+| Field          | Type          | Null | Key | Default | Extra          |
++----------------+---------------+------+-----+---------+----------------+
+| product_id     | int           | NO   | PRI | NULL    | auto_increment |
+| product_name   | varchar(100)  | YES  |     | NULL    |                |
+| description    | text          | YES  |     | NULL    |                |
+| price          | decimal(10,2) | YES  |     | NULL    |                |
+| stock_quantity | int           | YES  |     | NULL    |                |
++----------------+---------------+------+-----+---------+----------------+
+5 rows in set (0.00 sec)
+
+Orders Table:
+mysql> desc orders;
++--------------+---------------+------+-----+---------+----------------+
+| Field        | Type          | Null | Key | Default | Extra          |
++--------------+---------------+------+-----+---------+----------------+
+| order_id     | int           | NO   | PRI | NULL    | auto_increment |
+| customer_id  | int           | YES  | MUL | NULL    |                |
+| order_date   | datetime      | YES  |     | NULL    |                |
+| total_amount | decimal(10,2) | YES  |     | NULL    |                |
++--------------+---------------+------+-----+---------+----------------+
+4 rows in set (0.00 sec)
+
+Order_Items Table:
+mysql> desc order_items;
++---------------------+---------------+------+-----+---------+----------------+
+| Field               | Type          | Null | Key | Default | Extra          |
++---------------------+---------------+------+-----+---------+----------------+
+| order_item_id       | int           | NO   | PRI | NULL    | auto_increment |
+| order_id            | int           | YES  | MUL | NULL    |                |
+| product_id          | int           | YES  | MUL | NULL    |                |
+| quantity            | int           | YES  |     | NULL    |                |
+| price_at_order_time | decimal(10,2) | YES  |     | NULL    |                |
++---------------------+---------------+------+-----+---------+----------------+
+5 rows in set (0.00 sec)
+
+Payments Table:
+mysql> desc payments;
++----------------+---------------+------+-----+---------+----------------+
+| Field          | Type          | Null | Key | Default | Extra          |
++----------------+---------------+------+-----+---------+----------------+
+| payment_id     | int           | NO   | PRI | NULL    | auto_increment |
+| order_id       | int           | YES  | MUL | NULL    |                |
+| payment_date   | datetime      | YES  |     | NULL    |                |
+| payment_amount | decimal(10,2) | YES  |     | NULL    |                |
+| payment_status | varchar(50)   | YES  |     | NULL    |                |
++----------------+---------------+------+-----+---------+----------------+
+5 rows in set (0.00 sec)
+
+-------------------------------------------------------                  -------------------------------------------------
+
+--> How would you implement relationships between customers, orders, and products using foreign keys in MySQL?
+     
+    Foreign Key Relationships:
+
+      Orders.customer_id references Customers.customer_id.
+      Order_Items.order_id references Orders.order_id.
+      Order_Items.product_id references Products.product_id.
+      Payments.order_id references Orders.order_id.
+---------------------------------------------------------------------------------------------------------------------------
+2.Data Definition Language (DDL):
+
+--> Write DDL statements to create the following tables: Customers, Products, Orders, Order_Items, and Payments.
+--> How would you ensure that customer emails are unique in the Customers table?
+--> What constraints would you add to ensure data integrity for foreign key relationships between tables 
+   (e.g., between Orders and Customers, Order_Items and Orders)?
+
+
+create database casestudy;
+show databases;
++--------------------+
+| Database           |
++--------------------+
+| casestudy          |
+| information_schema |
+| mydb               |
+| mysql              |
+| performance_schema |
+| sakila             |
+| sys                |
+| world              |
++--------------------+
+use casestudy;
+CREATE TABLE Customers (
+    customer_id INT PRIMARY KEY AUTO_INCREMENT,
+    name VARCHAR(100),
+    email VARCHAR(100) UNIQUE,
+    phone VARCHAR(15),
+    address TEXT
+);
+
+CREATE TABLE Products (
+    product_id INT PRIMARY KEY AUTO_INCREMENT,
+    product_name VARCHAR(100),
+    description TEXT,
+    price DECIMAL(10, 2),
+    stock_quantity INT
+);
+
+CREATE TABLE Orders (
+    order_id INT PRIMARY KEY AUTO_INCREMENT,
+    customer_id INT,
+    order_date DATETIME,
+    total_amount DECIMAL(10, 2),
+    FOREIGN KEY (customer_id) REFERENCES Customers(customer_id)
+);
+
+CREATE TABLE Order_Items (
+    order_item_id INT PRIMARY KEY AUTO_INCREMENT,
+    order_id INT,
+    product_id INT,
+    quantity INT,
+    price_at_order_time DECIMAL(10, 2),
+    FOREIGN KEY (order_id) REFERENCES Orders(order_id),
+    FOREIGN KEY (product_id) REFERENCES Products(product_id)
+);
+
+CREATE TABLE Payments (
+    payment_id INT PRIMARY KEY AUTO_INCREMENT,
+    order_id INT,
+    payment_date DATETIME,
+    payment_amount DECIMAL(10, 2),
+    payment_status VARCHAR(50),
+    FOREIGN KEY (order_id) REFERENCES Orders(order_id)
+);
+
+
+mysql> SHOW TABLES;
++---------------------+
+| Tables_in_casestudy |
++---------------------+
+| customers           |
+| order_items         |
+| orders              |
+| payments            |
+| products            |
++---------------------+
+---------------------------------------------------------------------------------------------------------------------------
+3.ata Manipulation Language (DML)
+--> Write DML queries to insert sample data into the Customers and Products tables.
+
+INSERT INTO Customers (name, email, address, phone) 
+VALUES ('Lala Goud', 'lalagoud@gmail.com', 'Jagtial', '987654321');
+
+INSERT INTO Customers (name, email, address, phone) 
+VALUES ('Vishnu Kanaparthi', 'vishnuk@gmail.com', 'Karimnagar', '8765432199');
+
+mysql> SELECT * FROM customers;
++-------------+-------------------+--------------------+------------+------------+
+| customer_id | name              | email              | phone      | address    |
++-------------+-------------------+--------------------+------------+------------+
+|           1 | Lala Goud         | lalagoud@gmail.com | 987654321  | Jagtial    |
+|           2 | Vishnu Kanaparthi | vishnuk@gmail.com  | 8765432199 | Karimnagar |
++-------------+-------------------+--------------------+------------+------------+
+2 rows in set (0.00 sec)
+
+INSERT INTO Products (product_name, description, price, stock_quantity ) 
+VALUES ('Gaming Laptop', 'High-end gaming laptop with powerful GPU', 2500.00, 50);
+
+INSERT INTO Products (product_name, description, price, stock_quantity ) 
+VALUES ('Wireless Earbuds', 'Noise-cancelling wireless earbuds', 150.00, 200);
+
+mysql> SELECT * FROM Products;
++------------+------------------+------------------------------------------+---------+----------------+
+| product_id | product_name     | description                              | price   | stock_quantity |
++------------+------------------+------------------------------------------+---------+----------------+
+|          1 | Gaming Laptop    | High-end gaming laptop with powerful GPU | 2500.00 |             50 |
+|          2 | Wireless Earbuds | Noise-cancelling wireless earbuds        |  150.00 |            200 |
++------------+------------------+------------------------------------------+---------+----------------+
+2 rows in set (0.00 sec)
+	
+--> How would you add an order in the Orders table and its associated products in the Order_Items table using DML?
+
+INSERT INTO Orders (customer_id, total_amount) 
+VALUES (1, 2650.00);
+
+mysql> SELECT * FROM Orders;
++----------+-------------+------------+--------------+
+| order_id | customer_id | order_date | total_amount |
++----------+-------------+------------+--------------+
+|        1 |           1 | NULL       |      2650.00 |
++----------+-------------+------------+--------------+
+1 row in set (0.00 sec)
+
+ 
+INSERT INTO Order_Items (order_id, product_id, quantity, price_at_order_time) 
+VALUES (1, 1, 1, 2500.00);
+
+mysql> SELECT * FROM Order_Items;
++---------------+----------+------------+----------+---------------------+
+| order_item_id | order_id | product_id | quantity | price_at_order_time |
++---------------+----------+------------+----------+---------------------+
+|             1 |        1 |          1 |        1 |             2500.00 |
++---------------+----------+------------+----------+---------------------+
+1 row in set (0.00 sec)
+
+--> Write a DML query to update the stock of a product after an order has been placed.
+
+UPDATE Products 
+SET stock_quantity = stock_quantity - 2 
+WHERE product_id = 1;
+
+mysql> SELECT * FROM Products;
++------------+------------------+------------------------------------------+---------+----------------+
+| product_id | product_name     | description                              | price   | stock_quantity |
++------------+------------------+------------------------------------------+---------+----------------+
+|          1 | Gaming Laptop    | High-end gaming laptop with powerful GPU | 2500.00 |             48 |
+|          2 | Wireless Earbuds | Noise-cancelling wireless earbuds        |  150.00 |            200 |
++------------+------------------+------------------------------------------+---------+----------------+
+2 rows in set (0.00 sec)
+
+---------------------------------------------------------------------------------------------------------------------------
+4. Queries and Reporting:
+
+--> Write a SQL query to retrieve all orders placed by a specific customer, including the details of the products in each order.
+
+SELECT Orders.order_id, Products.product_name, Order_Items.quantity, Orders.total_amount
+FROM Orders
+JOIN Order_Items ON Orders.order_id = Order_Items.order_id
+JOIN Products ON Order_Items.product_id = Products.product_id
+WHERE Orders.customer_id = 1;
+ 
+--> How would you generate a report that shows the total revenue generated from all orders?
+  
+SELECT SUM(total_amount) AS total_revenue
+FROM Orders;
+
+--> Write a query to find the most purchased products on the platform.
+
+  SELECT product_id, SUM(quantity) AS total_purchased
+FROM Order_Items
+GROUP BY product_id
+ORDER BY total_purchased DESC
+LIMIT 1;
+
+---------------------------------------------------------------------------------------------------------------------------
+5. Database Optimization and Constraints:
+
+--> What indexing strategy would you implement to optimize query performance for fetching orders and products?
+
+CREATE INDEX idx_customer_id ON Orders(customer_id);
+CREATE INDEX idx_order_id ON Order_Items(order_id);
+CREATE INDEX idx_product_id ON Order_Items(product_id);
+CREATE INDEX idx_order_id_payments ON Payments(order_id);
+
+--> How would you enforce a rule where the total_amount in the Orders table must be equal 
+    to the sum of the associated products' prices from the Order_Items table?
+
+DELIMITER $$
+
+CREATE TRIGGER check_total_amount
+BEFORE INSERT ON Orders
+FOR EACH ROW
+BEGIN
+    DECLARE sum_items DECIMAL(10, 2);
+    
+    -- Calculate the total price of the associated order items
+    SELECT SUM(price_at_order_time * quantity) INTO sum_items
+    FROM Order_Items
+    WHERE order_id = NEW.order_id;
+
+    -- Check if the total amount matches the calculated sum
+    IF sum_items IS NULL THEN
+        SET sum_items = 0; -- If there are no items, set sum_items to 0
+    END IF;
+
+    IF sum_items != NEW.total_amount THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Total amount does not match the sum of order items';
+    END IF;
+END$$
+
+DELIMITER ;
+ 
+---------------------------------------------------------------------------------------------------------------------------
+
+6. Data Relationships:
+
+--> How would you handle a scenario where a product is deleted but exists in previous orders? 
+    What constraints or policies (like cascading) would you implement?
+
+ALTER TABLE Order_Items
+ADD CONSTRAINT fk_product_deleted
+FOREIGN KEY (product_id) REFERENCES Products(product_id)
+ON DELETE SET NULL;
+
+--> Design a query to calculate the average order value for each customer.
+
+SELECT customer_id, AVG(total_amount) AS average_order_value
+FROM Orders
+GROUP BY customer_id;
+
+---------------------------------------------------------------------------------------------------------------------------
+
+7. Data Integrity:
+
+--> How would you ensure that payment records are only created for valid orders?
+
+INSERT INTO Payments (order_id, payment_amount )
+SELECT 1, 2400.00
+WHERE EXISTS (SELECT * FROM Orders WHERE order_id = 1);
+
+--> What mechanism would you use to prevent inserting orders with products that are out of stock?
+
+ DELIMITER $$
+
+CREATE TRIGGER check_stock_before_order
+BEFORE INSERT ON Order_Items
+FOR EACH ROW
+BEGIN
+    DECLARE available_stock INT;
+
+    -- Check available stock for the product being ordered
+    SELECT stock_quantity INTO available_stock
+    FROM Products
+    WHERE product_id = NEW.product_id;
+
+    -- Compare stock quantity with the order quantity
+    IF available_stock < NEW.quantity THEN
+        -- Prevent the order if insufficient stock
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = CONCAT('Insufficient stock for product ID: ', NEW.product_id);
+    END IF;
+END$$
+
+DELIMITER ;
+
+---------------------------------------------------------------------------------------------------------------------------
+
+8. Database Normalization:
+
+--> Explain the normalization process applied to your database schema. What normal forms does your design satisfy, and why?
+   
+Normalization organizes data to reduce redundancy and improve data integrity. The schema satisfies 
+the first three normal forms (1NF, 2NF, 3NF) and Boyce-Codd Normal Form (BCNF).
+
+First Normal Form (1NF):
+Rules:
+
+Each table has a primary key.
+All columns contain atomic, indivisible values.
+No repeating groups or arrays.
+Application:
+
+Each table in the schema has a primary key (e.g., customer_id, product_id).
+Columns contain atomic values (e.g., name, email, price).
+Second Normal Form (2NF):
+Rules:
+
+Satisfies 1NF.
+All non-key attributes are fully functionally dependent on the primary key.
+Application:
+
+In Order_Items, quantity and price_at_order_time depend on the entire composite key (order_id, product_id).
+Third Normal Form (3NF):
+Rules:
+
+Satisfies 2NF.
+No transitive dependencies (non-key attributes depend only on the primary key).
+Application:
+
+Attributes like price in Products depend solely on product_id, not on other non-key attributes.
+Boyce-Codd Normal Form (BCNF):
+Rules:
+
+A stricter version of 3NF.
+Every determinant must be a candidate key.
+Application:
+
+All determinants (columns determining other columns) are candidate keys, ensuring no anomalies.
+
+--> Are there any cases where denormalization would be beneficial for performance? What would be the trade-offs?
+ 
+
+Denormalization involves introducing redundancy into a normalized database to improve read performance.
+
+When Denormalization is Beneficial:
+Improved Read Performance:
+
+Reduces the need for complex JOIN operations.
+Speeds up frequently run queries.
+Simplified Query Logic:
+
+Simplifies queries by having pre-joined or aggregated data.
+Reporting and Analytics:
+
+Pre-calculating and storing aggregated data can expedite reporting tasks.
+Handling High Read Loads:
+
+Useful in scenarios with heavy read traffic, such as browsing product catalogs.
+Trade-Offs of Denormalization:
+Increased Data Redundancy:
+
+Data is duplicated across multiple tables.
+Leads to larger storage requirements.
+Data Inconsistency Risks:
+
+Updates must be propagated to all redundant copies.
+Higher chance of data anomalies if not managed correctly.
+Complexity in Maintenance:
+
+Requires additional logic (e.g., triggers, application-level code) to keep data synchronized.
+Increases the complexity of write operations.
+Higher Storage Costs:
+
+Redundant data consumes more disk space.
+Potential for Update Anomalies:
+
+Inconsistent data can arise if all instances of redundant data aren't updated uniformly.
+
+---------------------------------------------------------------------------------------------------------------------------
+
+9. Error Handling and Transactions:
+
+--> How would you handle a scenario where multiple users are trying to purchase the same product, potentially leading to a stock conflict? 
+Implement a transaction in MySQL to address this.
+
+DELIMITER $$
+
+CREATE PROCEDURE RevertOrder(IN order_id INT, IN payment_status VARCHAR(20))
+BEGIN
+    DECLARE product_id INT;
+    DECLARE quantity INT;
+    DECLARE done INT DEFAULT 0;
+
+    -- Declare the cursor at the top
+    DECLARE cur CURSOR FOR 
+        SELECT product_id, quantity
+        FROM Order_Items
+        WHERE order_id = order_id;
+
+    -- Declare the handler for cursor operation
+    DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = 1;
+
+    -- Check if the payment status is 'Failed'
+    IF payment_status = 'Failed' THEN
+
+        -- Open the cursor to iterate over the products in the order
+        OPEN cur;
+
+        -- Loop through each product in the order
+        read_loop: LOOP
+            FETCH cur INTO product_id, quantity;
+
+            IF done THEN
+                LEAVE read_loop;
+            END IF;
+
+            -- Revert the stock quantity for each product in the order
+            UPDATE Products
+            SET stock_quantity = stock_quantity + quantity
+            WHERE product_id = product_id;
+        END LOOP;
+
+        -- Close the cursor
+        CLOSE cur;
+
+        -- Optionally delete the order if required
+        -- DELETE FROM Orders WHERE order_id = order_id;
+
+    END IF;
+END $$
+DELIMITER ;
+
+--> Write a query to revert an order and update the product stock if a payment fails.
+ 
+START TRANSACTION;
+-- Logic to revert order and update stock
+COMMIT; -- or ROLLBACK in case of failure
+
+---------------------------------------------------------------------------------------------------------------------------
+
+10. Scaling and Future Enhancements:
+
+--> How would you modify the database to support future requirements like product reviews, wishlists, and shopping carts?
+
+ Product Reviews
+
+CREATE TABLE Reviews (
+    review_id INT PRIMARY KEY AUTO_INCREMENT,
+    product_id INT,
+    customer_id INT,
+    rating INT CHECK (rating BETWEEN 1 AND 5), 
+    comment TEXT,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (product_id) REFERENCES Products(product_id) ON DELETE CASCADE,
+    FOREIGN KEY (customer_id) REFERENCES Customers(customer_id) ON DELETE CASCADE
+);
+
+Wishlists
+
+
+CREATE TABLE Wishlists (
+    wishlist_id INT PRIMARY KEY AUTO_INCREMENT,
+    customer_id INT,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (customer_id) REFERENCES Customers(customer_id) ON DELETE CASCADE
+);
+
+CREATE TABLE Wishlist_Items (
+    wishlist_item_id INT PRIMARY KEY AUTO_INCREMENT,
+    wishlist_id INT,
+    product_id INT,
+    FOREIGN KEY (wishlist_id) REFERENCES Wishlists(wishlist_id) ON DELETE CASCADE,
+    FOREIGN KEY (product_id) REFERENCES Products(product_id) ON DELETE CASCADE
+);
+
+
+Shopping Carts
+
+CREATE TABLE Carts (
+    cart_id INT PRIMARY KEY AUTO_INCREMENT,
+    customer_id INT,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (customer_id) REFERENCES Customers(customer_id) ON DELETE CASCADE
+);
+
+CREATE TABLE Cart_Items (
+    cart_item_id INT PRIMARY KEY AUTO_INCREMENT,
+    cart_id INT,
+    product_id INT,
+    quantity INT,
+    FOREIGN KEY (cart_id) REFERENCES Carts(cart_id) ON DELETE CASCADE,
+    FOREIGN KEY (product_id) REFERENCES Products(product_id) ON DELETE CASCADE
+);
+
+--> What strategies would you use to scale the database as the number of customers, products, and orders increases?
+
+1. Database Sharding
+Horizontal Scaling: Split the database into smaller, more manageable pieces called shards. Each shard can handle a portion of the overall load, allowing for more users and data to be processed concurrently.
+
+2. Read Replicas
+Replication: Set up read replicas to offload read operations from the main database server. This is especially useful for read-heavy applications like e-commerce platforms where many users may be browsing products simultaneously.
+
+3. Caching
+In-Memory Caching: Use caching solutions like Redis or Memcached to store frequently accessed data (e.g., product information, user sessions). This reduces the number of database queries and improves response times.
+
+4. Load Balancing
+Implement load balancers to distribute incoming requests across multiple servers. This ensures that no single server is overwhelmed, enhancing overall system performance.
+
+5. Indexing
+Create Indexes: For columns that are frequently searched, filtered, or joined, create indexes to speed up queries. For example, indexing customer_id in orders and products can significantly improve lookup times.
+
+6. Partitioning
+Database Partitioning: Split large tables into smaller, more manageable pieces based on certain criteria (e.g., time periods for orders). This improves query performance and simplifies data management.
+
+7. Monitoring and Optimization
+Continuously monitor database performance using tools that track slow queries and system resource usage. Optimize queries, indexes, and database structure based on usage patterns.
+
+8. Cloud Solutions
+Cloud Database Services: Consider using managed cloud database solutions (like AWS RDS, Google Cloud SQL, or Azure SQL Database) that offer scalability features, automatic backups, and easy replication.
+
+---------------------------------------------------------------------------------------------------------------------------
